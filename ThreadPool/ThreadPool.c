@@ -48,24 +48,24 @@ void *workercallback(void *arg)
 	}
 }
 
-int create_thread_pool(void *thread_pool, int max_thread_num, int worker_num, int allow_free_num)
+int create_thread_pool(void **thread_pool, int max_thread_num, int worker_num, int allow_free_num)
 {
-	pthread_pool *pool = (pthread_pool *)thread_pool;
+	pthread_pool **pool = (pthread_pool **)thread_pool;
 	if(pool == NULL){
 		perror("pool malloc");
 		return -1;
 	}
-	pool->shutdown = 0;
-	pool->max_thread_num = max_thread_num;
-	pool->current_thread_task_num = 0;
-	pool->current_wait_task_num = 0;
-	pool->max_free_thread_num = allow_free_num;
-	pthread_mutex_init(&pool->mutex,NULL);
-	pthread_cond_init(&pool->cond,NULL);
+	(*pool)->shutdown = 0;
+	(*pool)->max_thread_num = max_thread_num;
+	(*pool)->current_thread_task_num = 0;
+	(*pool)->current_wait_task_num = 0;
+	(*pool)->max_free_thread_num = allow_free_num;
+	pthread_mutex_init(&(*pool)->mutex,NULL);
+	pthread_cond_init(&(*pool)->cond,NULL);
 	
 	int i;
 	for(i = 0;i<worker_num;i++){
-		pool->current_thread_num++;
+		(*pool)->current_thread_num++;
 		thread_pool_worker *worker = (thread_pool_worker *)malloc(sizeof(thread_pool_worker));
 		if(worker == NULL){
 			perror("worker malloc");
@@ -74,7 +74,7 @@ int create_thread_pool(void *thread_pool, int max_thread_num, int worker_num, in
 		memset(worker,0,sizeof(worker));
 		worker->next = NULL;
 		worker->prev = NULL;
-		worker->pool = pool;
+		worker->pool = *pool;
 		int ret = pthread_create(&worker->pthread_id, NULL, workercallback, (void *)worker);
 		if(ret){
 			perror("pthread_create");
@@ -87,17 +87,17 @@ int create_thread_pool(void *thread_pool, int max_thread_num, int worker_num, in
 			worker = NULL;
 			break;
 		}
-		if(pool->workers == NULL){
-			pool->workers = worker;
-			pool->workers_end = worker;
+		if((*pool)->workers == NULL){
+			(*pool)->workers = worker;
+			(*pool)->workers_end = worker;
 		}
 		else{
-			worker->prev = pool->workers_end;
-			pool->workers_end->next = worker;
-			pool->workers_end = worker;
+			worker->prev = (*pool)->workers_end;
+			(*pool)->workers_end->next = worker;
+			(*pool)->workers_end = worker;
 		}
 	}	
-	pool->current_thread_free_num = (pool->current_thread_num - pool->current_thread_task_num);
+	(*pool)->current_thread_free_num = ((*pool)->current_thread_num - (*pool)->current_thread_task_num);
 	return 0;
 }
 

@@ -49,7 +49,7 @@ int main(){
 	char *m = "Hello world";
 	int t = 5;
 	pool = (pthread_pool *)malloc(sizeof(pthread_pool));
-	int q = create_thread_pool(pool,2,2,5);
+	int q = create_thread_pool((void **)&pool,2,2,5);
 	if(q != 0){
 		printf("%d\n",q);
 		return -1;
