@@ -1,37 +1,27 @@
 #ifndef SOCKET_H
 #define SOCKET_H
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
-#include <stdio.h>
-#include <arpa/inet.h>
-#include <string.h>
-#include <strings.h>
+
 
 void perr_exit(const char *str);
-int Socket(int family, int type, int protocol);
-int Bind(int fd, const struct sockaddr *sa, socklen_t sa_len);
-int Listen(int fd, int backlog);
-int Accept(int fd, struct sockaddr *sa, socklen_t *sa_lenptr);
-int Connect(int fd, const struct sockaddr *sa, socklen_t sa_len);
+int32_t Socket(int32_t family, int32_t type, int32_t protocol);
+int32_t Bind(int32_t fd, const struct sockaddr *sa, socklen_t sa_len);
+int32_t Listen(int32_t fd, int32_t backlog);
+int32_t Accept(int32_t fd, struct sockaddr *sa, socklen_t *sa_lenptr);
+int32_t Connect(int32_t fd, const struct sockaddr *sa, socklen_t sa_len);
 
-ssize_t Read(int fd, void *buf, size_t buf_size);
-ssize_t Write(int fd, const void *buf, size_t buf_size);
-ssize_t Read_one(int fd, char *buf);
-ssize_t Read_line(int fd, char *buf, size_t buf_size);
+int32_t Read(int32_t fd, void *buf, uint32_t buf_size);
+int32_t Write(int32_t fd, const void *buf, uint32_t buf_size);
+int32_t Read_one(int32_t fd, char *buf);
+int32_t Read_line(int32_t fd, char *buf, uint32_t buf_size);
 
+int32_t Recv(int32_t sockfd, void *buf, uint32_t len, int32_t flags);
+int32_t Send(int32_t sockfd, const void *buf, uint32_t len, int32_t flags);
+int32_t Recv_one(int32_t fd, char *buf, int32_t flags);
+int32_t Recv_line(int32_t fd, char *buf, uint32_t len);
 
-ssize_t Recv(int sockfd, void *buf, size_t len, int flags);
-ssize_t Send(int sockfd, const void *buf, size_t len, int flags);
-ssize_t Recv_one(int fd, char *buf, int flags);
-ssize_t Recv_line(int fd, char *buf, size_t len);
+int32_t Close(int32_t fd);
 
+int32_t initTcpSocket(const int32_t port, char *IP);
+int32_t initTcpConn(const int32_t port, char *IP);
 
-int Close(int fd);
-
-int initTcpSocket(const int port, char *IP);
-
-int initTcpConn(const int port, char *IP);
 #endif

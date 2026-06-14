@@ -1,53 +1,72 @@
+#include <stdint.h>
 #include <time.h>
-#include "logc.h"
 #include <stdlib.h>
 
-void log_create(char *filename){
-	pFile = fopen(filename,"a+");
-	if(pFile == NULL){
-		perror("fopen");
-		exit(1);
-	}
-	log_close();
+#include "logc.h"
+
+void log_create(char *filename)
+{
+    pFile = fopen(filename, "a+");
+
+    if (pFile == NULL)
+    {
+        perror("fopen");
+        exit(1);
+    }
+
+    log_close();
+
+    return;
 }
 
 void log_write(const char *fmt, ...)
 {
-	pFile = fopen(filename,"a+");
-	va_list args;
- 
-	va_start(args, fmt);
-	vlog_write(fmt, args);
-	va_end(args);
-	log_close();
+    pFile = fopen(filename, "a+");
+    va_list args;
+
+    va_start(args, fmt);
+    vlog_write(fmt, args);
+    va_end(args);
+    log_close();
+
+    return;
 }
 
 static void vlog_write(const char* fmt, va_list args)
 {
-	char buf[MAX_LOG_LEN+1] = {0};
-	char time[128] = {0};
-	get_current_time(time, sizeof(time) - 1);
-	vsnprintf(buf, sizeof(buf), fmt, args);
-	fprintf(pFile, "[%s] %s", time, buf);
-	fflush(pFile);
+    char buf[MAX_LOG_LEN + 1] = {0};
+    char time[128] = {0};
+
+    get_current_time(time, sizeof(time) - 1);
+    vsnprintf(buf, sizeof(buf), fmt, args);
+    fprintf(pFile, "[%s] %s", time, buf);
+    fflush(pFile);
+
+    return;
 }
 
-static void get_current_time(char *buf, int len)
+static void get_current_time(char *buf, int32_t len)
 {
-	time_t timep;
-	struct tm timer;
-	
-	timep = time(NULL);
-	localtime_r(&timep,&timer);
-	
-	snprintf(buf, len,"%d/%d/%d %d:%d:%d", \
-		(1900 + timer.tm_year), (1 + timer.tm_mon), timer.tm_mday, \
-		timer.tm_hour, timer.tm_min, timer.tm_sec);
+    time_t timep;
+    struct tm timer;
+
+    timep = time(NULL);
+    localtime_r(&timep, &timer);
+
+    snprintf(buf, len, "%d/%d/%d %d:%d:%d",
+        (1900 + timer.tm_year), (1 + timer.tm_mon), timer.tm_mday,
+        timer.tm_hour, timer.tm_min, timer.tm_sec);
+
+    return;
 }
- 
-static void log_close(){
-	if(pFile!=NULL){
-		fclose(pFile);
-		pFile = NULL;
-	}
+
+static void log_close()
+{
+    if (pFile != NULL)
+    {
+        fclose(pFile);
+        pFile = NULL;
+    }
+
+    return;
 }

@@ -1,57 +1,86 @@
-#include "epoll_tree.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <sys/epoll.h>
 
-//设置struct my_event
-int eventset(struct my_event *ev,int fd,void (*callback)(void *arg),void *arg,void *args){
-	ev->fd = fd;
-	ev->events = 0;
-	ev->callback = callback;
-	ev->arg = arg;
-	ev->args = args;
+#include "epoll_reactor.h"
+#include "Socket.h"
+
+// 设置my_event_s
+int32_t eventset(my_event_s *ev, int32_t fd, void (*callback)(void *arg), void *arg, void *args)
+{
+    ev->fd = fd;
+    ev->events = 0;
+    ev->callback = callback;
+    ev->arg = arg;
+    ev->args = args;
+    SET_BITS(ev->epoll_flag, EPOLL_OFF);     // 初始状态：不在epoll上
+
+    return;
 }
 
-//将事件添加到树上
-int eventadd(int epfd,int events,struct my_event *ev){
-	struct epoll_event epv;
-	bzero(&epv,sizeof(epv));
-	epv.data.ptr = ev;
-	epv.events = ev->events = events;
-	if(ev->status == 0)       //当status为1时 代表文件描述符已经在树上 eventadd失败
+// 将事件添加到树上
+int32_t eventadd(int32_t epfd, int32_t events, my_event_s *ev)
+{
+    struct epoll_event epv;
+
+    bzero(&epv, sizeof(epv));
+    epv.data.ptr = ev;
+    ev->events = events;
+    epv.events = events;
+
+    if (!TEST_BITS(ev->epoll_flag, EPOLL_ON))       // 当epoll_flag为EPOLL_ON时 代表文件描述符已经在树上 eventadd失败
     {
-        //将status置1
-        ev->status = 1;
+        // 将epoll_flag置为EPOLL_ON
+        SET_BITS(ev->epoll_flag, EPOLL_ON);
     }
-    else return -1;
-	if(epoll_ctl(epfd,EPOLL_CTL_ADD,ev->fd,&epv)!=0){
-		perror("epoll_ctl");
-		return -1;
-	}
-	return 0;
-}
-
-//修改树上的事件
-int eventmod(int epfd,int events,struct my_event *ev){
-	struct epoll_event epv;
-	bzero(&epv,sizeof(epv));
-	epv.data.ptr = ev;
-	epv.events = ev->events = events;
-	if(ev->status == 0)       //当status为0时 代表文件描述符不在树上 eventmod失败
+    else
     {
         return -1;
     }
-	if(epoll_ctl(epfd,EPOLL_CTL_MOD,ev->fd,&epv)!=0){
-		perror("epoll_ctl");
-		return -1;
-	}
-	return 0;
+
+    if (0 != epoll_ctl(epfd, EPOLL_CTL_ADD, ev->fd, &epv))
+    {
+        perror("epoll_ctl");
+        CLEAR_BITS(ev->epoll_flag, EPOLL_OFF);
+        return -1;
+    }
+
+    return 0;
 }
 
-//删除树上的事件
-int eventdel(int epfd,struct my_event *ev){
-	if(ev->status == 0){
-		return -1;
-	}
-	ev->status = 0;
-	ev = NULL;
-	epoll_ctl(epfd,EPOLL_CTL_DEL,ev->fd,NULL);
-	return 0;
+// 修改树上的事件
+int32_t eventmod(int32_t epfd, int32_t events, my_event_s *ev)
+{
+    struct epoll_event epv;
+
+    bzero(&epv, sizeof(epv));
+    epv.data.ptr = ev;
+    epv.events = ev->events = events;
+
+    if (!TEST_BITS(ev->epoll_flag, EPOLL_ON))       // 当epoll_flag为EPOLL_OFF时 代表文件描述符不在树上 eventmod失败
+    {
+        return -1;
+    }
+
+    if (0 != epoll_ctl(epfd, EPOLL_CTL_MOD, ev->fd, &epv))
+    {
+        perror("epoll_ctl");
+        return -1;
+    }
+
+    return 0;
+}
+
+// 删除树上的事件
+int32_t eventdel(int32_t epfd, my_event_s *ev)
+{
+    if (!TEST_BITS(ev->epoll_flag, EPOLL_ON))
+    {
+        return -1;
+    }
+
+    epoll_ctl(epfd, EPOLL_CTL_DEL, ev->fd, NULL);
+    CLEAR_BITS(ev->epoll_flag, EPOLL_ON);
+
+    return 0;
 }
