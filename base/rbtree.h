@@ -254,8 +254,8 @@ void rb_left_rotate(rb_tree_s *tree, rb_node_s *x);
 void rb_right_rotate(rb_tree_s *tree, rb_node_s *y);
 void rb_insert_fixup(rb_tree_s *tree, rb_node_s *z);
 void rb_delete_fixup(rb_tree_s *tree, rb_node_s *x);
-rb_node_s *rb_minimum_node(rb_node_s *node);
-rb_node_s *rb_maximum_node(rb_node_s *node);
+rb_node_s *rb_minimum_node(rb_node_s *node, rb_node_s *nil);
+rb_node_s *rb_maximum_node(rb_node_s *node, rb_node_s *nil);
 rb_node_s *rb_transplant(rb_tree_s *tree, rb_node_s *u, rb_node_s *v);
 int rb_validate_helper(rb_node_s *node, rb_node_s *nil, int *black_height);
 

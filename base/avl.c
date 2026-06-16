@@ -791,10 +791,11 @@ int avl_validate(avl_tree_t *tree)
     if (!tree)
         return 0;
 
-    /* 检查每个节点的平衡因子 */
+    /* 检查每个节点的平衡因子和 BST 排序性质 */
     avl_node_t *stack[128];
     int top = -1;
     avl_node_t *current = tree->root;
+    avl_node_t *prev = NULL;
 
     while (current != NULL || top >= 0)
     {
@@ -804,11 +805,23 @@ int avl_validate(avl_tree_t *tree)
             if (bf < -1 || bf > 1)
                 return 0; /* 不平衡 */
 
+            /* 检查高度是否正确 */
+            int expected_height = 1 + max_int(avl_node_height(current->left),
+                                              avl_node_height(current->right));
+            if (current->height != expected_height)
+                return 0; /* 高度错误 */
+
             stack[++top] = current;
             current = current->left;
         }
 
         current = stack[top--];
+
+        /* 检查 BST 性质：prev->key < current->key */
+        if (prev && tree->compare(prev->key, current->key) >= 0)
+            return 0; /* BST 排序错误 */
+
+        prev = current;
         current = current->right;
     }
 

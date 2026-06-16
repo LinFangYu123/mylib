@@ -13,7 +13,7 @@ int32_t eventset(my_event_s *ev, int32_t fd, void (*callback)(void *arg), void *
     ev->callback = callback;
     ev->arg = arg;
     ev->args = args;
-    SET_BITS(ev->epoll_flag, EPOLL_OFF);     // 初始状态：不在epoll上
+    ev->epoll_flag = 0;     // 初始状态：不在epoll上
 
     return;
 }
@@ -41,7 +41,7 @@ int32_t eventadd(int32_t epfd, int32_t events, my_event_s *ev)
     if (0 != epoll_ctl(epfd, EPOLL_CTL_ADD, ev->fd, &epv))
     {
         perror("epoll_ctl");
-        CLEAR_BITS(ev->epoll_flag, EPOLL_OFF);
+        CLEAR_BITS(ev->epoll_flag, EPOLL_ON);
         return -1;
     }
 

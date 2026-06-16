@@ -204,7 +204,17 @@ int hash_compare_pointer(const void *a, const void *b)
 
 int hash_compare_memory(const void *a, const void *b)
 {
-    /* 这个比较函数假设外部提供 key_size */
+    /* 注意：此函数需要知道键的大小才能正确比较。
+     * 函数签名 int (*)(const void*, const void*) 无法传入大小参数，
+     * 因此该函数无法独立完成内存比较。
+     *
+     * 如需比较内存键，请自行实现 compare 函数，或确保键是
+     * 字符串类型并使用 hash_compare_string。
+     *
+     * 当前退化为指针比较作为占位。
+     */
+    (void)a;
+    (void)b;
     return 0;
 }
 

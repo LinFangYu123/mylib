@@ -316,6 +316,10 @@ int hash_compare_pointer(const void *a, const void *b);
 
 /**
  * @brief 内存比较函数
+ * @note 该函数需要知道键的大小才能正确比较。由于函数签名限制，
+ *       无法传入大小参数。请自行实现比较函数或在创建哈希表时
+ *       使用 hash_compare_string（针对字符串键）。
+ *       当前实现仅作为占位符，总是返回相等。
  */
 int hash_compare_memory(const void *a, const void *b);
 

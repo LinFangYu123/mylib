@@ -255,9 +255,9 @@ void rb_delete_fixup(rb_tree_s *tree, rb_node_s *x)
 /**
  * @brief 查找最小节点
  */
-rb_node_s *rb_minimum_node(rb_node_s *node)
+rb_node_s *rb_minimum_node(rb_node_s *node, rb_node_s *nil)
 {
-    while (node->left)
+    while (node->left != nil)
         node = node->left;
     return node;
 }
@@ -265,9 +265,9 @@ rb_node_s *rb_minimum_node(rb_node_s *node)
 /**
  * @brief 查找最大节点
  */
-rb_node_s *rb_maximum_node(rb_node_s *node)
+rb_node_s *rb_maximum_node(rb_node_s *node, rb_node_s *nil)
 {
-    while (node->right)
+    while (node->right != nil)
         node = node->right;
     return node;
 }
@@ -530,7 +530,7 @@ int rb_delete(rb_tree_s *tree, void *key)
     }
     else
     {
-        y = rb_minimum_node(z->right);
+        y = rb_minimum_node(z->right, tree->nil);
         y_original_color = y->color;
         x = y->right;
 
@@ -605,7 +605,7 @@ void *rb_minimum(rb_tree_s *tree)
     if (!tree || tree->root == tree->nil)
         return NULL;
 
-    rb_node_s *node = rb_minimum_node(tree->root);
+    rb_node_s *node = rb_minimum_node(tree->root, tree->nil);
     return node != tree->nil ? node->data : NULL;
 }
 
@@ -617,7 +617,7 @@ void *rb_maximum(rb_tree_s *tree)
     if (!tree || tree->root == tree->nil)
         return NULL;
 
-    rb_node_s *node = rb_maximum_node(tree->root);
+    rb_node_s *node = rb_maximum_node(tree->root, tree->nil);
     return node != tree->nil ? node->data : NULL;
 }
 
@@ -648,7 +648,7 @@ void *rb_predecessor(rb_tree_s *tree, void *key)
         {
             /* 找到节点，找前驱 */
             if (node->left != tree->nil)
-                predecessor = rb_maximum_node(node->left);
+                predecessor = rb_maximum_node(node->left, tree->nil);
             break;
         }
     }
@@ -683,7 +683,7 @@ void *rb_successor(rb_tree_s *tree, void *key)
         {
             /* 找到节点，找后继 */
             if (node->right != tree->nil)
-                successor = rb_minimum_node(node->right);
+                successor = rb_minimum_node(node->right, tree->nil);
             break;
         }
     }
