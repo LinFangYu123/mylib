@@ -63,6 +63,8 @@ void *workercallback(void *arg)
 
         pthread_mutex_unlock(&worker->pool->mutex);
     }
+
+    return NULL;
 }
 
 int32_t create_thread_pool(void **thread_pool, int32_t max_thread_num, int32_t worker_num, int32_t allow_free_num)
@@ -73,6 +75,13 @@ int32_t create_thread_pool(void **thread_pool, int32_t max_thread_num, int32_t w
     {
         perror("pool malloc");
         return -1;
+    }
+
+    *pool = (pthread_pool *)calloc(1, sizeof(pthread_pool));
+    if (NULL == *pool)
+    {
+        perror("pthread_pool malloc");
+        return -2;
     }
 
     (*pool)->shutdown = 0;
@@ -98,7 +107,7 @@ int32_t create_thread_pool(void **thread_pool, int32_t max_thread_num, int32_t w
             return -2;
         }
 
-        memset(worker, 0, sizeof(worker));
+        memset(worker, 0, sizeof(*worker));
         worker->next = NULL;
         worker->prev = NULL;
         worker->pool = *pool;
@@ -111,13 +120,6 @@ int32_t create_thread_pool(void **thread_pool, int32_t max_thread_num, int32_t w
             free(worker);
             worker = NULL;
             return -3;
-        }
-
-        if (pthread_detach(worker->pthread_id) != 0)
-        {
-            free(worker);
-            worker = NULL;
-            break;
         }
 
         if ((*pool)->workers == NULL)
@@ -200,13 +202,6 @@ int32_t add_task(void *thread_pool, void *(*newtask)(void *arg), void *arg)
                 break;
             }
 
-            if (pthread_detach(worker->pthread_id) != 0)
-            {
-                free(worker);
-                worker = NULL;
-                break;
-            }
-
             pool->workers_end->next = worker;
             worker->prev = pool->workers_end;
             pool->workers_end = pool->workers_end->next;
@@ -248,9 +243,19 @@ int32_t thread_pool_destroy(void *thread_pool)
         worker = pool->workers;
         pool->workers = pool->workers->next;
 
-        while (1 == worker->status)
+        if (0 == worker->status)
         {
-            usleep(200);
+            /* Worker was idle, wait for it to fully exit after shutdown signal */
+            pthread_join(worker->pthread_id, NULL);
+        }
+        else
+        {
+            /* Worker was busy, spin until it finishes current task */
+            while (1 == worker->status)
+            {
+                usleep(200);
+            }
+            pthread_join(worker->pthread_id, NULL);
         }
 
         free(worker);

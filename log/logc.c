@@ -1,11 +1,32 @@
+#include <stdio.h>
 #include <stdint.h>
+#include <stdarg.h>
 #include <time.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "logc.h"
 
+static char *log_filename = NULL;
+FILE *pFile = NULL;
+
+/* 前置声明 */
+static void get_current_time(char *buf, int32_t len);
+static void log_close(void);
+
 void log_create(char *filename)
 {
+    if (log_filename)
+    {
+        free(log_filename);
+    }
+    log_filename = strdup(filename);
+    if (!log_filename)
+    {
+        perror("strdup");
+        exit(1);
+    }
+
     pFile = fopen(filename, "a+");
 
     if (pFile == NULL)
@@ -14,19 +35,6 @@ void log_create(char *filename)
         exit(1);
     }
 
-    log_close();
-
-    return;
-}
-
-void log_write(const char *fmt, ...)
-{
-    pFile = fopen(filename, "a+");
-    va_list args;
-
-    va_start(args, fmt);
-    vlog_write(fmt, args);
-    va_end(args);
     log_close();
 
     return;
@@ -41,6 +49,29 @@ static void vlog_write(const char* fmt, va_list args)
     vsnprintf(buf, sizeof(buf), fmt, args);
     fprintf(pFile, "[%s] %s", time, buf);
     fflush(pFile);
+
+    return;
+}
+
+void log_write(const char *fmt, ...)
+{
+    if (!log_filename)
+    {
+        return;
+    }
+
+    pFile = fopen(log_filename, "a+");
+    if (!pFile)
+    {
+        return;
+    }
+
+    va_list args;
+
+    va_start(args, fmt);
+    vlog_write(fmt, args);
+    va_end(args);
+    log_close();
 
     return;
 }

@@ -434,8 +434,8 @@ int avl_delete(avl_tree_t *tree, void *key)
         void *suc_key = successor->key;
         void *suc_data = successor->data;
 
-        /* 记录重新平衡的起点（后继节点的父节点） */
-        rebalance_start = successor->parent == node ? successor : successor->parent;
+        /* 记录重新平衡的起点 */
+        rebalance_start = successor->parent == node ? node : successor->parent;
 
         /* 后继节点最多只有一个右子节点 */
         avl_node_t *suc_child = successor->right;

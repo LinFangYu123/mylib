@@ -91,7 +91,7 @@ int32_t Connect(int32_t fd, const struct sockaddr *sa, socklen_t sa_len)
 
     if (n == -1)
     {
-        perr_exit("bind");
+        perr_exit("connect");
     }
     return n;
 }

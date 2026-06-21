@@ -1,6 +1,8 @@
 #ifndef SOCKET_H
 #define SOCKET_H
 
+#include <stdint.h>
+#include <sys/socket.h>
 
 void perr_exit(const char *str);
 int32_t Socket(int32_t family, int32_t type, int32_t protocol);
@@ -17,7 +19,7 @@ int32_t Read_line(int32_t fd, char *buf, uint32_t buf_size);
 int32_t Recv(int32_t sockfd, void *buf, uint32_t len, int32_t flags);
 int32_t Send(int32_t sockfd, const void *buf, uint32_t len, int32_t flags);
 int32_t Recv_one(int32_t fd, char *buf, int32_t flags);
-int32_t Recv_line(int32_t fd, char *buf, uint32_t len);
+int32_t Recv_line(int32_t fd, char *buf, uint32_t len, int32_t flags);
 
 int32_t Close(int32_t fd);
 

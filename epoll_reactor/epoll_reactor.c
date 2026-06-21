@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/epoll.h>
 
 #include "epoll_reactor.h"
@@ -15,7 +16,7 @@ int32_t eventset(my_event_s *ev, int32_t fd, void (*callback)(void *arg), void *
     ev->args = args;
     ev->epoll_flag = 0;     // 初始状态：不在epoll上
 
-    return;
+    return 0;
 }
 
 // 将事件添加到树上
@@ -23,7 +24,7 @@ int32_t eventadd(int32_t epfd, int32_t events, my_event_s *ev)
 {
     struct epoll_event epv;
 
-    bzero(&epv, sizeof(epv));
+    memset(&epv, 0, sizeof(epv));
     epv.data.ptr = ev;
     ev->events = events;
     epv.events = events;
@@ -53,7 +54,7 @@ int32_t eventmod(int32_t epfd, int32_t events, my_event_s *ev)
 {
     struct epoll_event epv;
 
-    bzero(&epv, sizeof(epv));
+    memset(&epv, 0, sizeof(epv));
     epv.data.ptr = ev;
     epv.events = ev->events = events;
 

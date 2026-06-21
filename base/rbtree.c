@@ -356,8 +356,8 @@ rb_tree_s *rb_create(int (*compare)(const void *a, const void *b),
     }
 
     nil->color = RB_BLACK;
-    nil->left = NULL;
-    nil->right = NULL;
+    nil->left = nil;
+    nil->right = nil;
     nil->parent = NULL;
     nil->key = NULL;
     nil->data = NULL;

@@ -1,4 +1,7 @@
 #include "ThreadPool.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 int32_t p, d, f;
 
@@ -12,6 +15,7 @@ void *task1(void *arg)
     }
 
     printf("task 1 is finish\n");
+    return NULL;
 }
 
 void *task2(void *arg)
@@ -26,6 +30,7 @@ void *task2(void *arg)
     }
 
     printf("task 2 is finish\n");
+    return NULL;
 }
 
 void *task3(void *arg)
@@ -41,6 +46,7 @@ void *task3(void *arg)
     }
 
     printf("task 3 is finish\n");
+    return NULL;
 }
 
 void display(pthread_pool *pool)

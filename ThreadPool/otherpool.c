@@ -7,7 +7,8 @@
 #include <string.h>
 #include <signal.h>
 #include <errno.h>
-#include "threadpool.h"
+#include <stdbool.h>
+#include "ThreadPool.h"
 
 #define DEFAULT_TIME 10            // 领导定时检查队列、线程状态的时间间隔
 #define MIN_WAIT_TASK_NUM 10        // 队列中等待的任务数>这个值，便会增加线程
@@ -19,7 +20,7 @@ typedef struct
     void *arg;
 } threadpool_task_t;
 
-struct threadpool_t
+typedef struct threadpool_t
 {
     pthread_mutex_t lock;            // mutex for the taskpool
     pthread_mutex_t thread_counter;  // mutex for count the busy thread
@@ -38,7 +39,7 @@ struct threadpool_t
     int32_t queue_size;
     int32_t queue_max_size;
     bool shutdown;
-};
+} threadpool_t;
 
 /**
  * @function void *threadpool_thread(void *threadpool)
